@@ -3,4 +3,12 @@ export interface EnvironmentType {
 
   spotifyClientId: string;
   spotifyClientSecret: string;
+
+  maria: {
+    host: string;
+    port: number;
+    user: string;
+    pass: string;
+    db: string;
+  };
 }

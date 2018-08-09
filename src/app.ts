@@ -1,6 +1,8 @@
-import * as express from 'express'
-import { SpotifyHelper } from './helpers/SpotifyHelper';
+import { Sequelize } from 'sequelize-typescript';
 import * as cors from 'cors';
+import * as express from 'express'
+
+import { SpotifyHelper } from './helpers/SpotifyHelper';
 
 class App {
   public express: any;
@@ -8,6 +10,7 @@ class App {
 
   constructor() {
     this.express = express();
+    this.configureSequelize();
     this.configureCors();
     this.mountRoutes();
   }
@@ -40,6 +43,19 @@ class App {
 
     this.express.use(cors(corsOptions));
     this.express.options("*", cors(corsOptions))
+  }
+
+
+  private configureSequelize(): void {
+    const sequelize =  new Sequelize({
+      database: 'song_thingy_dev',
+      dialect: 'mysql',
+      username: 'root',
+      password: '',
+      storage: ':memory:',
+      modelPaths: [__dirname + '/models'],
+      port: 13306
+    });
   }
 }
 
