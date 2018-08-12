@@ -15,6 +15,8 @@
     "db-migrate-mysql": "^1.1.10",
     "express": "^4.16.3",
     "mysql2": "^1.5.3",
+    "passport": "^0.4.0",
+    "passport-spotify": "^1.0.1",
     "reflect-metadata": "^0.1.12",
     "sequelize": "^4.38.0",
     "sequelize-typescript": "^0.6.5",
@@ -25,7 +27,9 @@
   },
   "devDependencies": {
     "@types/cors": "^2.8.4",
+    "@types/morgan": "^1.7.35",
     "@types/node": "^10.5.1",
+    "morgan": "^1.9.0",
     "tsconfig-paths": "^3.4.2",
     "tslint": "^5.10.0"
   }

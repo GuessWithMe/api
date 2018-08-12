@@ -1,17 +1,31 @@
 import { Sequelize } from 'sequelize-typescript';
-import * as cors from 'cors';
-import * as express from 'express'
+import { Strategy as SpotifyStrategy } from 'passport-spotify';
+import cors from 'cors';
+import express from 'express'
+import morgan from 'morgan';
+const passport = require('passport');
 
 import { SpotifyHelper } from './helpers/SpotifyHelper';
+import { User } from '@models/User';
+import Environment from '@env';
+
+// Routes
+import UserRoutes from '@routes/User';
+import AuthRoutes from '@routes/Auth';
+
 
 class App {
   public express: any;
   public corsOptions: object;
+  public spotifyStrategy = SpotifyStrategy;
 
   constructor() {
     this.express = express();
     this.configureSequelize();
     this.configureCors();
+    this.setupPassport(passport);
+    this.configureMorgan();
+
     this.mountRoutes();
   }
 
@@ -29,6 +43,8 @@ class App {
       }
     });
 
+    this.express.use('/users', UserRoutes);
+    this.express.use('/auth', AuthRoutes);
     this.express.use('/', router);
   }
 
@@ -37,7 +53,10 @@ class App {
       allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "X-Access-Token"],
       credentials: true,
       methods: "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
-      origin: 'http://localhost:4200',
+      origin: [
+        'http://localhost:4200',
+        'https://accounts.spotify.com'
+      ],
       preflightContinue: false
     }
 
@@ -48,14 +67,46 @@ class App {
 
   private configureSequelize(): void {
     const sequelize =  new Sequelize({
-      database: 'song_thingy_dev',
+      database: Environment.maria.db,
       dialect: 'mysql',
-      username: 'root',
-      password: '',
+      username: Environment.maria.user,
+      password: Environment.maria.pass,
       storage: ':memory:',
       modelPaths: [__dirname + '/models'],
-      port: 13306
+      port: Environment.maria.port,
     });
+  }
+
+
+  private setupPassport(passport: any): void {
+    passport.serializeUser((object, done) => {
+      done(undefined, object);
+    });
+
+    passport.deserializeUser(async (id, done) => {
+      done();
+    });
+
+    passport.use(
+      new SpotifyStrategy(
+        {
+          clientID: Environment.spotifyClientId,
+          clientSecret: Environment.spotifyClientSecret,
+          callbackURL: 'http://localhost:3000/auth/spotify/callback'
+        },
+        function(accessToken, refreshToken, expires_in, profile, done) {
+          return done(undefined, { profile, accessToken, refreshToken, expires_in });
+        }
+      )
+    );
+
+    this.express.use(passport.initialize());
+    this.express.use(passport.session());
+  }
+
+
+  private configureMorgan() {
+    this.express.use(morgan('tiny'));
   }
 }
 

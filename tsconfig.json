@@ -7,10 +7,17 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
 
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+
     "baseUrl": "./",
     "paths": {
       "@env": [ "./src/config/environment" ],
-      "@t/*": [ "./src/types/*" ]
+      "@t/*": [ "./src/types/*" ],
+      "@models/*": [ "./src/models/*" ],
+      "@routes/*": [ "./src/routes/*" ],
+      "@controllers/*": [ "./src/controllers/*" ],
+      "@services/*": [ "./src/services/*" ]
     }
   },
   "include": [

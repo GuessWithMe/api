@@ -4,6 +4,8 @@ export interface EnvironmentType {
   spotifyClientId: string;
   spotifyClientSecret: string;
 
+  angularUrl: string;
+
   maria: {
     host: string;
     port: number;
