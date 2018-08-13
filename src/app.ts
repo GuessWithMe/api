@@ -2,7 +2,10 @@ import { Sequelize } from 'sequelize-typescript';
 import { Strategy as SpotifyStrategy } from 'passport-spotify';
 import cors from 'cors';
 import express from 'express'
+import session from 'express-session';
 import morgan from 'morgan';
+import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 const passport = require('passport');
 
 import { SpotifyHelper } from './helpers/SpotifyHelper';
@@ -23,45 +26,36 @@ class App {
     this.express = express();
     this.configureSequelize();
     this.configureCors();
+    this.configureExpressSession();
     this.setupPassport(passport);
     this.configureMorgan();
 
     this.mountRoutes();
   }
 
+
   private mountRoutes(): void {
     const router = express.Router()
-    router.get('/', async (req, res) => {
-      const spotify = await SpotifyHelper.initializeSpotify();
-
-      let res2;
-      try {
-        res2 = await spotify.getTrack('5ikzUqSyy8XiZYvVQncA4n')
-        return res.json(res2.body)
-      } catch (error) {
-        return res.status(500).json(error);
-      }
-    });
-
     this.express.use('/users', UserRoutes);
     this.express.use('/auth', AuthRoutes);
     this.express.use('/', router);
   }
 
+
   private configureCors(): void {
     const corsOptions = {
-      allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "X-Access-Token"],
+      // allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "X-Access-Token"],
       credentials: true,
-      methods: "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
+      // methods: "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
       origin: [
         'http://localhost:4200',
         'https://accounts.spotify.com'
       ],
-      preflightContinue: false
+      // preflightContinue: false,
     }
 
     this.express.use(cors(corsOptions));
-    this.express.options("*", cors(corsOptions))
+    // this.express.options("*", cors(corsOptions))
   }
 
 
@@ -78,13 +72,35 @@ class App {
   }
 
 
+  private configureExpressSession() {
+    this.express.use(bodyParser.json());
+    this.express.use(bodyParser.urlencoded({ extended: false }));
+    this.express.use(cookieParser());
+
+
+    var RedisStore = require('connect-redis')(session);
+
+    this.express.use(session({
+      store: new RedisStore({
+        host: Environment.redis.host,
+        port: Environment.redis.port,
+      }),
+      secret: 'keyboard cat',
+      resave: false,
+      saveUninitialized: true,
+      cookie: { secure: ( Environment.env === 'production') }
+      // cookie: {}
+    }))
+  }
+
+
   private setupPassport(passport: any): void {
-    passport.serializeUser((object, done) => {
-      done(undefined, object);
+    passport.serializeUser((user, done) => {
+      done(undefined, user);
     });
 
-    passport.deserializeUser(async (id, done) => {
-      done();
+    passport.deserializeUser((user, done) => {
+      done(null, user);
     });
 
     passport.use(
@@ -94,8 +110,26 @@ class App {
           clientSecret: Environment.spotifyClientSecret,
           callbackURL: 'http://localhost:3000/auth/spotify/callback'
         },
-        function(accessToken, refreshToken, expires_in, profile, done) {
-          return done(undefined, { profile, accessToken, refreshToken, expires_in });
+        (accessToken, refreshToken, expires_in, profile, done) => {
+          let imageUrl;
+          if (profile.photos.length > 0) {
+            imageUrl = profile.photos[0];
+          }
+
+          User.findOrCreate({
+            where: {
+              spotifyId: profile.id,
+            },
+            defaults: {
+              spotifyUsername: profile.username,
+              spotifyAccessToken: accessToken,
+              spotifyRefreshToken: refreshToken,
+              spotifyDisplayName: profile.displayName,
+              spotifyImageUrl: imageUrl,
+            }
+          }).then((user) => {
+            return done(undefined, user);
+          })
         }
       )
     );

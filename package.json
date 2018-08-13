@@ -10,10 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.18.3",
+    "connect-redis": "^3.3.3",
+    "cookie-parser": "^1.4.3",
     "cors": "^2.8.4",
     "db-migrate": "^0.11.1",
     "db-migrate-mysql": "^1.1.10",
     "express": "^4.16.3",
+    "express-session": "^1.15.6",
     "mysql2": "^1.5.3",
     "passport": "^0.4.0",
     "passport-spotify": "^1.0.1",
@@ -27,6 +31,7 @@
   },
   "devDependencies": {
     "@types/cors": "^2.8.4",
+    "@types/express-session": "^1.15.10",
     "@types/morgan": "^1.7.35",
     "@types/node": "^10.5.1",
     "morgan": "^1.9.0",

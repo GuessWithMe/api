@@ -2,13 +2,14 @@ import { Router } from 'express';
 const router = Router();
 
 import * as UserController from '@controllers/UserController';
+import { isAuthenticated } from '@middleware/AuthMiddleware';
 
 router.get('/playlists',
-  UserController.getPlaylists
+  isAuthenticated, UserController.getPlaylists
 );
 
 router.post('/import-from-playlist',
-  UserController.importFromPlaylist
+  isAuthenticated, UserController.importFromPlaylist
 );
 
 export default router;

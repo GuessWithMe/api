@@ -13,4 +13,9 @@ export interface EnvironmentType {
     pass: string;
     db: string;
   };
+
+  redis: {
+    host: string;
+    port: number;
+  },
 }
