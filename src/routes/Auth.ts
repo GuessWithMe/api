@@ -19,6 +19,9 @@ router.get('/spotify/callback',
 
 router.get('/spotify', passport.authenticate('spotify'));
 
+
+router.get('/logout', AuthController.logOut);
+
 // router.get('/login',
 //   AuthController.loginWithSpotify
 // );
