@@ -22,4 +22,7 @@ export class User extends Model<User> {
 
   @Column
   public spotifyImageUrl: string;
+
+  @Column
+  public tokenExpiresAt: Date;
 }

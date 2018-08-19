@@ -6,15 +6,16 @@ import session from 'express-session';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
+import moment from 'moment';
 const passport = require('passport');
 
-import { SpotifyHelper } from './helpers/SpotifyHelper';
 import { User } from '@models/User';
 import Environment from '@env';
 
 // Routes
 import UserRoutes from '@routes/User';
 import AuthRoutes from '@routes/Auth';
+import PlaylistRoutes from '@routes/Playlist';
 
 
 class App {
@@ -38,6 +39,7 @@ class App {
     const router = express.Router()
     this.express.use('/users', UserRoutes);
     this.express.use('/auth', AuthRoutes);
+    this.express.use('/playlists', PlaylistRoutes);
     this.express.use('/', router);
   }
 
@@ -116,13 +118,16 @@ class App {
             imageUrl = profile.photos[0];
           }
 
+          console.log(expires_in);
+
           const userData = {
-            spotifyUsername: profile.username,
             spotifyAccessToken: accessToken,
-            spotifyRefreshToken: refreshToken,
             spotifyDisplayName: profile.displayName,
+            spotifyId: profile.id,
             spotifyImageUrl: imageUrl,
-            spotifyId: profile.id
+            spotifyRefreshToken: refreshToken,
+            spotifyUsername: profile.username,
+            tokenExpiresAt: moment().add(expires_in, 'seconds').toDate(),
           }
 
           let user = await User.find({ where: {

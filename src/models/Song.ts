@@ -1,5 +1,5 @@
 import {
-  Table, Model, Column, BelongsToMany, PrimaryKey, AutoIncrement
+  Table, Model, Column, BelongsToMany, PrimaryKey, AutoIncrement, HasMany
 } from 'sequelize-typescript';
 import { Artist } from '@models/Artist';
 import { SongArtist } from '@models/SongArtist';
@@ -18,13 +18,13 @@ export class Song extends Model<Song> {
   public name: string;
 
   @Column
-  public spotifyId: string;
-
-  @Column
   public popularity: string;
 
   @Column
   public previewUrl: string;
+
+  @Column
+  public spotifyId: string;
 
   @Column
   public spotifyUrl: string;
