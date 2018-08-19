@@ -110,26 +110,32 @@ class App {
           clientSecret: Environment.spotifyClientSecret,
           callbackURL: 'http://localhost:3000/auth/spotify/callback'
         },
-        (accessToken, refreshToken, expires_in, profile, done) => {
+        async (accessToken, refreshToken, expires_in, profile, done) => {
           let imageUrl;
           if (profile.photos.length > 0) {
             imageUrl = profile.photos[0];
           }
 
-          User.findOrCreate({
-            where: {
-              spotifyId: profile.id,
-            },
-            defaults: {
-              spotifyUsername: profile.username,
-              spotifyAccessToken: accessToken,
-              spotifyRefreshToken: refreshToken,
-              spotifyDisplayName: profile.displayName,
-              spotifyImageUrl: imageUrl,
-            }
-          }).then((user) => {
-            return done(undefined, user);
-          })
+          const userData = {
+            spotifyUsername: profile.username,
+            spotifyAccessToken: accessToken,
+            spotifyRefreshToken: refreshToken,
+            spotifyDisplayName: profile.displayName,
+            spotifyImageUrl: imageUrl,
+            spotifyId: profile.id
+          }
+
+          let user = await User.find({ where: {
+            spotifyId: profile.id,
+          }});
+
+          if (user) {
+            user = await user.update(userData);
+          } else {
+            user = await User.create(userData);
+          }
+
+          return done(undefined, user);
         }
       )
     );
