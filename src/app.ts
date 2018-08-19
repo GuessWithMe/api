@@ -6,15 +6,16 @@ import session from 'express-session';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
+import moment from 'moment';
 const passport = require('passport');
 
-import { SpotifyHelper } from './helpers/SpotifyHelper';
 import { User } from '@models/User';
 import Environment from '@env';
 
 // Routes
 import UserRoutes from '@routes/User';
 import AuthRoutes from '@routes/Auth';
+import PlaylistRoutes from '@routes/Playlist';
 
 
 class App {
@@ -38,6 +39,7 @@ class App {
     const router = express.Router()
     this.express.use('/users', UserRoutes);
     this.express.use('/auth', AuthRoutes);
+    this.express.use('/playlists', PlaylistRoutes);
     this.express.use('/', router);
   }
 
@@ -110,26 +112,35 @@ class App {
           clientSecret: Environment.spotifyClientSecret,
           callbackURL: 'http://localhost:3000/auth/spotify/callback'
         },
-        (accessToken, refreshToken, expires_in, profile, done) => {
+        async (accessToken, refreshToken, expires_in, profile, done) => {
           let imageUrl;
           if (profile.photos.length > 0) {
             imageUrl = profile.photos[0];
           }
 
-          User.findOrCreate({
-            where: {
-              spotifyId: profile.id,
-            },
-            defaults: {
-              spotifyUsername: profile.username,
-              spotifyAccessToken: accessToken,
-              spotifyRefreshToken: refreshToken,
-              spotifyDisplayName: profile.displayName,
-              spotifyImageUrl: imageUrl,
-            }
-          }).then((user) => {
-            return done(undefined, user);
-          })
+          console.log(expires_in);
+
+          const userData = {
+            spotifyAccessToken: accessToken,
+            spotifyDisplayName: profile.displayName,
+            spotifyId: profile.id,
+            spotifyImageUrl: imageUrl,
+            spotifyRefreshToken: refreshToken,
+            spotifyUsername: profile.username,
+            tokenExpiresAt: moment().add(expires_in, 'seconds').toDate(),
+          }
+
+          let user = await User.find({ where: {
+            spotifyId: profile.id,
+          }});
+
+          if (user) {
+            user = await user.update(userData);
+          } else {
+            user = await User.create(userData);
+          }
+
+          return done(undefined, user);
         }
       )
     );
