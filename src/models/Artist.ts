@@ -1,17 +1,25 @@
 import {
-  Table, Model, Column, BelongsTo
+  Table, Model, Column, BelongsTo, HasMany, BelongsToMany, PrimaryKey, AutoIncrement
 } from 'sequelize-typescript';
 import { Song } from '@models/Song';
+import { SongArtist } from '@models/SongArtist';
 
 @Table({ tableName: 'artists' })
 export class Artist extends Model<Artist> {
+  @PrimaryKey
+  @AutoIncrement
+  @Column
+  public id: number;
 
-  @BelongsTo(() => Song, 'songId')
-  public user: Song;
+  @BelongsToMany(() => Song, () => SongArtist)
+  public songs: Song[];
 
   @Column
   public name: string;
 
   @Column
   public spotifyId: string;
+
+  @Column
+  public spotifyUrl: string;
 }

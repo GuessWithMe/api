@@ -1,9 +1,18 @@
 import {
-  Table, Model, Column
+  Table, Model, Column, BelongsToMany, PrimaryKey, AutoIncrement
 } from 'sequelize-typescript';
+import { Artist } from '@models/Artist';
+import { SongArtist } from '@models/SongArtist';
 
 @Table({ tableName: 'songs' })
 export class Song extends Model<Song> {
+  @PrimaryKey
+  @AutoIncrement
+  @Column
+  public id: number;
+
+  @BelongsToMany(() => Artist, () => SongArtist)
+  public artists: Artist[];
 
   @Column
   public name: string;
@@ -16,4 +25,7 @@ export class Song extends Model<Song> {
 
   @Column
   public previewUrl: string;
+
+  @Column
+  public spotifyUrl: string;
 }
