@@ -162,7 +162,7 @@ class App {
   }
 
 
-  private startSongDistributer() {
+  private async startSongDistributer() {
     SongDistrubuterService.startSongDistributer();
   }
 }

@@ -1,4 +1,5 @@
-var sio = require('socket.io');
+// var sio = require('socket.io');
+import sio from 'socket.io';
 var io = null;
 
 exports.io = () => {
@@ -8,9 +9,7 @@ exports.io = () => {
 exports.initialize = (server) => {
   io = sio(server);
 
-  io.on('connection', function(client){
-    client.emit('event', { data: true });
-
+  io.on('connection', async function(client){
     client.on('event', function(data){
       console.log(data);
       console.log('event');
