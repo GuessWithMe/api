@@ -11,6 +11,7 @@ const passport = require('passport');
 
 import { User } from '@models/User';
 import Environment from '@env';
+import SongDistrubuterService from '@services/SongDistributer.service';
 
 // Routes
 import UserRoutes from '@routes/User';
@@ -30,8 +31,9 @@ class App {
     this.configureExpressSession();
     this.setupPassport(passport);
     this.configureMorgan();
-
+    this.configureWebSockets();
     this.mountRoutes();
+    this.startSongDistributer();
   }
 
 
@@ -118,8 +120,6 @@ class App {
             imageUrl = profile.photos[0];
           }
 
-          console.log(expires_in);
-
           const userData = {
             spotifyAccessToken: accessToken,
             spotifyDisplayName: profile.displayName,
@@ -152,6 +152,18 @@ class App {
 
   private configureMorgan() {
     this.express.use(morgan('tiny'));
+  }
+
+
+  private configureWebSockets() {
+    var server = require('http').createServer(this.express);
+    var io = require('./config/websockets.ts').initialize(server);
+    server.listen(3001);
+  }
+
+
+  private startSongDistributer() {
+    SongDistrubuterService.startSongDistributer();
   }
 }
 
