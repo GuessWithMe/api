@@ -3,7 +3,7 @@ import SpotifyService from '@services/Spotify.service';
 
 export async function getPlaylists(req: Request, res: Response): Promise<Response> {
   try {
-    const playlists = await new SpotifyService().getUserPlaylists();
+    const playlists = await new SpotifyService().getUserPlaylists(res.locals.user);
 
     return res.json(playlists.body);
   } catch (error) {
