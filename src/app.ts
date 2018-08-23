@@ -11,12 +11,13 @@ const passport = require('passport');
 
 import { User } from '@models/User';
 import Environment from '@env';
-import SongDistrubuterService from '@services/SongDistributer.service';
+import * as SongDistrubuter from '@services/SongDistributer.service';
 
 // Routes
-import UserRoutes from '@routes/User';
 import AuthRoutes from '@routes/Auth';
+import GameRoutes from '@routes/Game';
 import PlaylistRoutes from '@routes/Playlist';
+import UserRoutes from '@routes/User';
 
 
 class App {
@@ -39,9 +40,10 @@ class App {
 
   private mountRoutes(): void {
     const router = express.Router()
-    this.express.use('/users', UserRoutes);
     this.express.use('/auth', AuthRoutes);
+    this.express.use('/game', GameRoutes);
     this.express.use('/playlists', PlaylistRoutes);
+    this.express.use('/users', UserRoutes);
     this.express.use('/', router);
   }
 
@@ -163,7 +165,7 @@ class App {
 
 
   private async startSongDistributer() {
-    SongDistrubuterService.startSongDistributer();
+    SongDistrubuter.start();
   }
 }
 
