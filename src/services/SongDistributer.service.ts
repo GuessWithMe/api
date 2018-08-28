@@ -30,6 +30,9 @@ export async function getRandomSong(): Promise<Song> {
     }
   });
 
+  // const song = await Song.findById(267, {
+  //   include: [ Artist ]
+  // });
   return song;
 }
 

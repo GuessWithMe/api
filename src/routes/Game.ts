@@ -8,4 +8,12 @@ router.get('/current-song',
   isAuthenticated, GameController.getCurrentSong
 );
 
+router.post('/add-player',
+  isAuthenticated, GameController.addActiveUser
+);
+
+router.post('/remove-player',
+  isAuthenticated, GameController.removeActiveUser
+);
+
 export default router;

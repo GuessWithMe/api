@@ -14,7 +14,7 @@ export async function getPlaylists(req: Request, res: Response): Promise<Respons
 
 export async function importFromPlaylist(req: Request, res: Response): Promise<Response> {
   try {
-    const playlist = await new SpotifyService().getPlaylist(req.body.id);
+    const playlist = await new SpotifyService().getPlaylist(res.locals.user, req.body.id);
     return res.json(playlist);
   } catch (error) {
     return res.status(500).json(error.message);

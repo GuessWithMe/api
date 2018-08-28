@@ -1,5 +1,6 @@
 // var sio = require('socket.io');
 import sio from 'socket.io';
+import GameService from '@services/Game.service';
 var io = null;
 
 exports.io = () => {
@@ -9,14 +10,13 @@ exports.io = () => {
 exports.initialize = (server) => {
   io = sio(server);
 
-  io.on('connection', async function(client){
-    client.on('event', function(data){
-      console.log(data);
-      console.log('event');
+  io.on('connection', async (socket) => {
+    socket.on('event', (data) => {
+
     });
 
-    client.on('disconnect', function(){
-      console.log('disconnect');
+    socket.on('disconnect', async () => {
+      await GameService.removeActiveUser(socket.id);
     });
   });
 };

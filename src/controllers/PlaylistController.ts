@@ -8,7 +8,7 @@ import { ImportHelper } from '../helpers/ImportHelper';
 export async function getPlaylists(req: Request, res: Response): Promise<Response> {
   try {
     const playlists = await new SpotifyService().getUserPlaylists(
-      req.session.user
+      res.locals.user
     );
 
     return res.json(playlists.body);

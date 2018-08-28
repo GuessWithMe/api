@@ -12,13 +12,15 @@
 
     "baseUrl": "./",
     "paths": {
+      "@config/*": [ "./src/config/*" ],
+      "@controllers/*": [ "./src/controllers/*" ],
       "@env": [ "./src/config/environment" ],
-      "@t/*": [ "./src/types/*" ],
+      "@helpers/*": [ "./src/helpers/*" ],
+      "@middleware/*": [ "./src/middleware/*" ],
       "@models/*": [ "./src/models/*" ],
       "@routes/*": [ "./src/routes/*" ],
-      "@controllers/*": [ "./src/controllers/*" ],
       "@services/*": [ "./src/services/*" ],
-      "@middleware/*": [ "./src/middleware/*" ]
+      "@t/*": [ "./src/types/*" ]
     }
   },
   "include": [

@@ -10,6 +10,7 @@ import * as AuthController from '@controllers/AuthController';
 const router = Router();
 
 import { User } from '@models/User';
+import { isAuthenticated } from '@middleware/AuthMiddleware';
 
 
 router.get('/spotify/callback',
@@ -19,6 +20,7 @@ router.get('/spotify/callback',
 
 router.get('/spotify', passport.authenticate('spotify'));
 
+router.get('/check', isAuthenticated, AuthController.checkIfAuthed);
 
 router.get('/logout', AuthController.logOut);
 
