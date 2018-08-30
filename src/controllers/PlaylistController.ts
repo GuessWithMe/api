@@ -22,7 +22,7 @@ export async function getPlaylists(req: Request, res: Response): Promise<Respons
 export async function importPlaylist(req: Request, res: Response): Promise<Response> {
   try {
     const songsRes = await new SpotifyService().getPlaylist(
-      req.session.user,
+      res.locals.user,
       req.body.playlist.spotifyId,
     );
 
