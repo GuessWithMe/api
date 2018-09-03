@@ -1,6 +1,4 @@
 import { getConnection as getRedisConnection, ACTIVE_PLAYERS_KEY } from '@config/redis';
-import { Song } from "@models/Song";
-import { User } from "@models/User";
 import SocketService from '@services/Socket.service';
 
 export class ActivePlayerHelper {
@@ -29,10 +27,10 @@ export class ActivePlayerHelper {
           reject(error);
         }
 
-        if (!!result && result !== 'undefined') {
+        if (result) {
           resolve(JSON.parse(result));
         } else {
-          resolve();
+          resolve({});
         }
       });
     });

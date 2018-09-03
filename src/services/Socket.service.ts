@@ -21,7 +21,10 @@ export default class SocketService {
   public broadcastActivePlayerList(activePlayers: object) {
     const result = Object.keys(activePlayers).map((key) => {
       return {
-        spotifyUsername: activePlayers[key].spotifyUsername
+        id: activePlayers[key].id,
+        spotifyUsername: activePlayers[key].spotifyUsername,
+        titleCorrect: activePlayers[key].titleCorrect || false,
+        artistCorrect: activePlayers[key].artistCorrect || false
       }
     });
 

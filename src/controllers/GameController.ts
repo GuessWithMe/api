@@ -5,10 +5,10 @@ import * as SongDistributer from '@services/SongDistributer.service';
 import GameService from '@services/Game.service';
 import SocketService from "@services/Socket.service";
 
-export async function getCurrentSong(req: Request, res: Response): Promise<Response> {
+export async function getStatus(req: Request, res: Response): Promise<Response> {
   try {
-    const currentSong = SongDistributer.getCurrentSong();
-    return res.json(currentSong);
+    const status = SongDistributer.getStatus();
+    return res.json(status);
   } catch (error) {
     return res.status(500).json(error.message);
   }
@@ -23,6 +23,8 @@ export async function addActiveUser(req: Request, res: Response): Promise<Respon
       activePlayers = {};
     }
     activePlayers[req.body.socketId] = res.locals.user;
+
+
 
     await ActivePlayerHelper.setActivePlayers(activePlayers);
     new SocketService().broadcastActivePlayerList(activePlayers);

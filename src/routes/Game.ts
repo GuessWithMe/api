@@ -4,8 +4,8 @@ const router = Router();
 import * as GameController from '@controllers/GameController';
 import { isAuthenticated } from '@middleware/AuthMiddleware';
 
-router.get('/current-song',
-  isAuthenticated, GameController.getCurrentSong
+router.get('/status',
+  isAuthenticated, GameController.getStatus
 );
 
 router.post('/add-player',

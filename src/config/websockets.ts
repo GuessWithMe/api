@@ -18,5 +18,10 @@ exports.initialize = (server) => {
     socket.on('disconnect', async () => {
       await GameService.removeActiveUser(socket.id);
     });
+
+
+    socket.on('guessProgressUpdate', async (guessData) => {
+      await GameService.updatePlayersGuessProgress(socket.id, guessData);
+    });
   });
 };

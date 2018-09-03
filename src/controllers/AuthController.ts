@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 
 export async function loginWithSpotify(req: Request, res: Response): Promise<void> {
-  req.session.user = req.user;
   return res.redirect('http://localhost:4200/game');
 }
 
