@@ -1,7 +1,6 @@
 import SocketService from "@services/Socket.service";
 import { Sequelize } from "sequelize-typescript";
-import { Song } from "@models/Song";
-import { Artist } from "@models/Artist";
+import { Song, Artist } from "@models";
 import moment from 'moment';
 
 let currentSong: Song;

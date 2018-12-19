@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
+import Environment from '@env';
+
 
 export async function loginWithSpotify(req: Request, res: Response): Promise<void> {
-  return res.redirect('http://localhost:4200/game');
+  return res.redirect(`${Environment.angularUrl}/game`);
 }
 
 

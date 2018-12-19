@@ -1,11 +1,11 @@
-import { Song } from "@models/Song";
-var io = require('../config/websockets').io;
+import { Song } from "@models";
+import Websockets from "@config/websockets";
 
 export default class SocketService {
   private socket;
 
   constructor() {
-    this.socket = io();
+    this.socket = Websockets.getIo();
   }
 
   public sendNextSong(song: Song) {

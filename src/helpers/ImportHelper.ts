@@ -1,5 +1,4 @@
-import { Song } from "@models/Song";
-import { Artist } from "@models/Artist";
+import { Artist, Song } from "@models";
 
 export class ImportHelper {
   public static async importSong(track: any): Promise<Song> {

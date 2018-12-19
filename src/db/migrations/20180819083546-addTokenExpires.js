@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    queryInterface.addColumn(
+    return queryInterface.addColumn(
       'users',
       'tokenExpiresAt',
       Sequelize.DATE
@@ -10,7 +10,7 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    queryInterface.removeColumn(
+    return queryInterface.removeColumn(
       'users',
       'tokenExpiresAt'
     )

@@ -1,7 +1,7 @@
 import moment from 'moment';
 import SpotifyWebApi from 'spotify-web-api-node';
 
-import { User } from '@models/User';
+import { User } from '@models';
 import Environment from '@env';
 
 export class SpotifyHelper {

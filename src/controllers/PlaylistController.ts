@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
 
-import { Artist } from '@models/Artist';
-import { Song } from '@models/Song';
 import SpotifyService from '@services/Spotify.service';
 import { ImportHelper } from '../helpers/ImportHelper';
 

@@ -44,3 +44,10 @@ export async function removeActiveUser(req: Request, res: Response): Promise<Res
     return res.status(500).json(error.message);
   }
 }
+
+
+export async function health(req: Request, res: Response): Promise<Response> {
+  return res.status(200).json({
+    health: true
+  });
+}

@@ -1,8 +1,7 @@
 import {
   Table, Model, Column, BelongsTo, PrimaryKey, AutoIncrement, ForeignKey
 } from 'sequelize-typescript';
-import { Song } from '@models/Song';
-import { Artist } from '@models/Artist';
+import { Artist, Song } from '@models';
 
 @Table({ tableName: 'songArtists' })
 export class SongArtist extends Model<SongArtist> {

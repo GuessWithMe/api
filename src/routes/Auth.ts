@@ -9,7 +9,7 @@ import * as AuthController from '@controllers/AuthController';
 
 const router = Router();
 
-import { User } from '@models/User';
+import { User } from '@models';
 import { isAuthenticated } from '@middleware/AuthMiddleware';
 
 

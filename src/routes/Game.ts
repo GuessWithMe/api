@@ -13,7 +13,11 @@ router.post('/add-player',
 );
 
 router.post('/remove-player',
-  isAuthenticated, GameController.removeActiveUser
+  isAuthenticated, GameController.health
+);
+
+router.get('/health',
+  GameController.health
 );
 
 export default router;

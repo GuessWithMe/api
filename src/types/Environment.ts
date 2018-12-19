@@ -5,6 +5,7 @@ export interface EnvironmentType {
   spotifyClientSecret: string;
 
   angularUrl: string;
+  apiUrl: string;
 
   maria: {
     host: string;

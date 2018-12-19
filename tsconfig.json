@@ -6,9 +6,11 @@
     "sourceMap": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "keyofStringsOnly": true,
 
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    "moduleResolution": "node",
 
     "baseUrl": "./",
     "paths": {
@@ -17,7 +19,7 @@
       "@env": [ "./src/config/environment" ],
       "@helpers/*": [ "./src/helpers/*" ],
       "@middleware/*": [ "./src/middleware/*" ],
-      "@models/*": [ "./src/models/*" ],
+      "@models": [ "./src/models" ],
       "@routes/*": [ "./src/routes/*" ],
       "@services/*": [ "./src/services/*" ],
       "@t/*": [ "./src/types/*" ]
@@ -25,7 +27,7 @@
   },
   "include": [
     "src/**/*.ts",
-    "bin/**/*"
+    "bin/**/*",
   ],
   "exclude": [
     "node_modules"

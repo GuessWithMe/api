@@ -1,5 +1,5 @@
 import { SpotifyHelper } from "src/helpers/SpotifyHelper";
-import { User } from "@models/User";
+import { User } from "@models";
 
 export default class SpotifyService {
   private spotify;

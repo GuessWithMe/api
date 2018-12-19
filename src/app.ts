@@ -9,15 +9,23 @@ import cookieParser from 'cookie-parser';
 import moment from 'moment';
 const passport = require('passport');
 
-import { User } from '@models/User';
 import Environment from '@env';
 import * as SongDistrubuter from '@services/SongDistributer.service';
+import Websockets from "@config/websockets";
 
 // Routes
 import AuthRoutes from '@routes/Auth';
 import GameRoutes from '@routes/Game';
 import PlaylistRoutes from '@routes/Playlist';
 import UserRoutes from '@routes/User';
+
+import {
+  Album,
+  Artist,
+  Song,
+  SongArtist,
+  User,
+} from '@models';
 
 
 class App {
@@ -54,8 +62,8 @@ class App {
       credentials: true,
       // methods: "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
       origin: [
-        'http://localhost:4200',
-        'https://accounts.spotify.com'
+        Environment.angularUrl,
+        'https://accounts.spotify.com',
       ],
       // preflightContinue: false,
     }
@@ -67,14 +75,22 @@ class App {
 
   private configureSequelize(): void {
     const sequelize =  new Sequelize({
+      host: Environment.maria.host,
       database: Environment.maria.db,
       dialect: 'mysql',
       username: Environment.maria.user,
       password: Environment.maria.pass,
       storage: ':memory:',
-      modelPaths: [__dirname + '/models'],
       port: Environment.maria.port,
     });
+
+    sequelize.addModels([
+      Album,
+      Artist,
+      Song,
+      SongArtist,
+      User,
+    ]);
   }
 
 
@@ -94,8 +110,7 @@ class App {
       secret: 'keyboard cat',
       resave: false,
       saveUninitialized: true,
-      cookie: { secure: ( Environment.env === 'production') }
-      // cookie: {}
+      cookie: { secure: false }
     }))
   }
 
@@ -114,7 +129,7 @@ class App {
         {
           clientID: Environment.spotifyClientId,
           clientSecret: Environment.spotifyClientSecret,
-          callbackURL: 'http://localhost:3000/auth/spotify/callback'
+          callbackURL: `${Environment.apiUrl}/auth/spotify/callback`
         },
         async (accessToken, refreshToken, expires_in, profile, done) => {
           let imageUrl;
@@ -159,7 +174,7 @@ class App {
 
   private configureWebSockets() {
     var server = require('http').createServer(this.express);
-    var io = require('./config/websockets.ts').initialize(server);
+    Websockets.initialize(server);
     server.listen(3001);
   }
 
