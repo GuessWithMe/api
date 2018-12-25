@@ -5,10 +5,17 @@ import * as SongDistributer from '@services/SongDistributer.service';
 import GameService from '@services/Game.service';
 import SocketService from "@services/Socket.service";
 
+
+/**
+ * Retrives the active song, time left and active player list.
+ */
 export async function getStatus(req: Request, res: Response): Promise<Response> {
   try {
     const status = SongDistributer.getStatus();
-    return res.json(status);
+    let activePlayers = await ActivePlayerHelper.getActivePlayers();
+    activePlayers = ActivePlayerHelper.filterActivePlayerListForClient(activePlayers);
+
+    return res.json({ status, activePlayers });
   } catch (error) {
     return res.status(500).json(error.message);
   }
@@ -24,8 +31,6 @@ export async function addActiveUser(req: Request, res: Response): Promise<Respon
     }
     activePlayers[req.body.socketId] = res.locals.user;
 
-
-
     await ActivePlayerHelper.setActivePlayers(activePlayers);
     new SocketService().broadcastActivePlayerList(activePlayers);
 
@@ -36,6 +41,9 @@ export async function addActiveUser(req: Request, res: Response): Promise<Respon
 }
 
 
+/**
+ * Removes user from the active player list
+ */
 export async function removeActiveUser(req: Request, res: Response): Promise<Response> {
   try {
     await GameService.removeActiveUser(req.body.socketId);

@@ -12,6 +12,13 @@ export async function checkIfAuthed(req: Request, res: Response): Promise<Respon
 }
 
 
+/**
+ * Log out and remove user from the player list
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {(Promise<Response | void>)}
+ */
 export async function logOut(req: Request, res: Response): Promise<Response | void> {
   req.session.destroy(() => {
     return res.status(204).json();

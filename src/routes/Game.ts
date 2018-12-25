@@ -13,7 +13,7 @@ router.post('/add-player',
 );
 
 router.post('/remove-player',
-  isAuthenticated, GameController.health
+  isAuthenticated, GameController.removeActiveUser
 );
 
 router.get('/health',

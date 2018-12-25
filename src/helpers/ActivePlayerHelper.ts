@@ -35,6 +35,24 @@ export class ActivePlayerHelper {
       });
     });
   }
+
+
+  /**
+   * Changes active player list from object to array, filters sensitive data
+   * @static
+   * @param {object} activePlayers
+   * @returns object[]
+   */
+  public static filterActivePlayerListForClient(activePlayers: object): object[] {
+    return Object.keys(activePlayers).map((key) => {
+      return {
+        id: activePlayers[key].id,
+        spotifyUsername: activePlayers[key].spotifyUsername,
+        titleCorrect: activePlayers[key].titleCorrect || false,
+        artistCorrect: activePlayers[key].artistCorrect || false
+      }
+    });
+  }
 }
 
 

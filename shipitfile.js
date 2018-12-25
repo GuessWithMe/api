@@ -65,7 +65,12 @@ module.exports = shipit => {
     await shipit.remote(`rm -rf ${shipit.config.deployTo}/current`);
 
     // Create a symlink to the new release
-    return shipit.remote(`ln -s ${targetDir}/ ${shipit.config.deployTo}/current`);
+    await shipit.remote(`ln -s ${targetDir}/ ${shipit.config.deployTo}/current`);
+
+    await shipit.remote(`pm2 delete all`, { cwd: targetDir });
+
+    // return shipit.remote(`pm2 start ecosystem.prod.js`, { cwd: targetDir });
+    return shipit.remote(`NODE_ENV=production pm2 start index.js --node-args="-r tsconfig-paths/register"`, { cwd: `${targetDir}/src` });
   });
 
 

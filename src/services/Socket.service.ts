@@ -1,5 +1,7 @@
+import { ActivePlayerHelper } from "@helpers/ActivePlayerHelper";
 import { Song } from "@models";
 import Websockets from "@config/websockets";
+
 
 export default class SocketService {
   private socket;
@@ -18,17 +20,13 @@ export default class SocketService {
   }
 
 
-  public broadcastActivePlayerList(activePlayers: object) {
-    const result = Object.keys(activePlayers).map((key) => {
-      return {
-        id: activePlayers[key].id,
-        spotifyUsername: activePlayers[key].spotifyUsername,
-        titleCorrect: activePlayers[key].titleCorrect || false,
-        artistCorrect: activePlayers[key].artistCorrect || false
-      }
-    });
-
-    this.socket.emit('activePlayers', result);
+  /**
+   * Broadcasts active player list to all clients using websockets.
+   * @param {object} activePlayers
+   */
+  public broadcastActivePlayerList(activePlayers: object): void {
+    activePlayers = ActivePlayerHelper.filterActivePlayerListForClient(activePlayers);
+    this.socket.emit('activePlayers', activePlayers);
   }
 
 
