@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 
 import SpotifyService from '@services/Spotify.service';
 import { ImportHelper } from '../helpers/ImportHelper';
+import { SpotifySong } from '@t/SpotifySong';
 
 export async function getPlaylists(req: Request, res: Response): Promise<Response> {
   try {
@@ -17,6 +18,9 @@ export async function getPlaylists(req: Request, res: Response): Promise<Respons
 }
 
 
+/**
+ * Imports all the possible songs from a players given playlist
+ */
 export async function importPlaylist(req: Request, res: Response): Promise<Response> {
   try {
     const songsRes = await new SpotifyService().getPlaylist(
@@ -24,8 +28,7 @@ export async function importPlaylist(req: Request, res: Response): Promise<Respo
       req.body.playlist.spotifyId,
     );
 
-
-    for (const s of songsRes.body['tracks'].items) {
+    for (const s of songsRes.body['tracks'].items as SpotifySong[]) {
       // No use from local tracks since we can't play them
       // for everyone.
       if (s.is_local) {
@@ -40,6 +43,9 @@ export async function importPlaylist(req: Request, res: Response): Promise<Respo
 
       const song = await ImportHelper.importSong(s.track);
       await song.$set('artists', songArtists);
+
+      const album = await ImportHelper.importAlbum(s.track.album);
+      await song.$set('album', album);
     }
 
     return res.json({ status: true });

@@ -1,6 +1,6 @@
 import SocketService from "@services/Socket.service";
 import { Sequelize } from "sequelize-typescript";
-import { Song, Artist } from "@models";
+import { Song, Artist, Album } from "@models";
 import moment from 'moment';
 
 let currentSong: Song;
@@ -14,7 +14,7 @@ export async function start(): Promise<void> {
   await this.sendNextSong();
 
   timer = setInterval(function tick(self) {
-    new SocketService().sendPause();
+    new SocketService().sendPause(currentSong);
     clearInterval(leftCountdown);
     leftCountdown = setInterval(function() {
       let secondsLeft = moment().diff(startingTime, 'seconds');
@@ -40,7 +40,7 @@ export function getStatus(): object {
 export async function getRandomSong(): Promise<Song> {
   const song = await Song.find({
     order: [ Sequelize.fn('RAND') ],
-    include: [ Artist ],
+    include: [ Artist, Album ],
     where: {
       previewUrl: { $ne: null }
     }
@@ -60,61 +60,16 @@ export async function sendNextSong(): Promise<void> {
 }
 
 
+/**
+ * Sends a pause event and restarts with a new guess after certain number of
+ * seconds have passed.
+ *
+ * @returns Promise<void>
+ */
 export async function restartAfterPause(): Promise<void> {
-  new SocketService().sendPause();
+  new SocketService().sendPause(currentSong);
   // Start a new after a pause.
   setTimeout(async () => {
     await this.start();
   }, 5000)
 }
-
-
-// export async function startSongDistributer(): Promise<void> {
-//   console.log('startSongDistrubuter');
-//   let timerId = setTimeout(async function tick(selfOut) {
-//     setTimeout(async (self) => {
-//       const song = await self.getRandomSong();
-//       currentSong = song;
-//       new SocketService().sendNextSong(song);
-//       timerId = setTimeout(tick, 30000, selfOut); // (*)
-//     }, 5000, this);
-
-//     new SocketService().sendPause();
-//   }, 0, this);
-// }
-
-
-
-// export function IntervalTimer(callback, interval) {
-//   var timerId, startTime, remaining = 0;
-//   var state = 0; //  0 = idle, 1 = running, 2 = paused, 3= resumed
-
-//   this.pause = function () {
-//     if (state != 1) return;
-
-//     remaining = interval - (Number(new Date()) - startTime);
-//     clearInterval(timerId);
-//     state = 2;
-//   };
-
-//   this.resume = function () {
-//     if (state != 2) return;
-
-//     state = 3;
-//     setTimeout(this.timeoutCallback, remaining);
-//   };
-
-//   this.timeoutCallback = function () {
-//     if (state != 3) return;
-
-//     callback();
-
-//     startTime = new Date();
-//     timerId = setInterval(callback, interval);
-//     state = 1;
-//   };
-
-//   startTime = new Date();
-//   timerId = setInterval(callback, interval);
-//   state = 1;
-// }

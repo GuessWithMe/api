@@ -5,10 +5,6 @@ import { Artist } from '@models';
 
 @Table({ tableName: 'albums' })
 export class Album extends Model<Album> {
-
-  @BelongsTo(() => Artist, 'artistId')
-  public artist: Artist;
-
   @Column
   public name: string;
 
@@ -19,7 +15,7 @@ export class Album extends Model<Album> {
   public imageUrl: string;
 
   @Column
-  public releaseDate: string;
+  public releaseDate: Date;
 
   @Column
   public spotifyUrl: string;

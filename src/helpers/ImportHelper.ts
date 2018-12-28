@@ -1,4 +1,7 @@
-import { Artist, Song } from "@models";
+import moment from 'moment';
+
+import { Artist, Song, Album } from "@models";
+import { Album as SpotifyAlbum } from "@t/SpotifySong";
 
 export class ImportHelper {
   public static async importSong(track: any): Promise<Song> {
@@ -40,6 +43,42 @@ export class ImportHelper {
     }
 
     return artist;
+  }
+
+
+  /**
+   * Imports an album and it's properties.
+   *
+   * @static
+   * @param {SpotifyAlbum} spotifyAlbum
+   * @returns Promise<Album>
+   * @memberof ImportHelper
+   */
+  public static async importAlbum(spotifyAlbum: SpotifyAlbum): Promise<Album> {
+    let album = await Album.findOne({ where: {
+      spotifyId: spotifyAlbum.id
+    }});
+
+    let imageUrl: string = null;
+    if (spotifyAlbum.images && spotifyAlbum.images.length > 0) {
+      imageUrl = spotifyAlbum.images[1].url;
+    }
+
+    const albumObject = {
+      name: spotifyAlbum.name,
+      spotifyUrl: spotifyAlbum.external_urls.spotify,
+      imageUrl,
+      releaseDate: moment.utc(spotifyAlbum.release_date).toDate(),
+      spotifyId: spotifyAlbum.id,
+    }
+
+    if (album) {
+      album = await album.update(albumObject);
+    } else {
+      album = await Album.create(albumObject);
+    }
+
+    return album;
   }
 }
 

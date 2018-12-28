@@ -1,7 +1,7 @@
 import sio from 'socket.io';
 import GameService from '@services/Game.service';
 
-let io;
+let io: sio.Server;
 
 export default class Websockets {
   public static initialize(server) {
@@ -23,7 +23,7 @@ export default class Websockets {
     });
   }
 
-  public static getIo() {
+  public static getIo(): sio.Server {
     return io;
   }
 }

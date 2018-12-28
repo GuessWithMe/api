@@ -1,3 +1,5 @@
+import sio from 'socket.io';
+
 import { ActivePlayerHelper } from "@helpers/ActivePlayerHelper";
 import { Song } from "@models";
 import Websockets from "@config/websockets";
@@ -15,14 +17,21 @@ export default class SocketService {
   }
 
 
-  public sendPause() {
-    this.socket.emit('pause');
+  /**
+   * Sends a pause event with the last song played for displaying the correct
+   * answer
+   *
+   * @param song - song that just finished playing
+   */
+  public sendPause(song: Song) {
+    this.socket.emit('pause', song);
   }
 
 
   /**
    * Broadcasts active player list to all clients using websockets.
-   * @param {object} activePlayers
+   *
+   * @param activePlayers
    */
   public broadcastActivePlayerList(activePlayers: object): void {
     activePlayers = ActivePlayerHelper.filterActivePlayerListForClient(activePlayers);
