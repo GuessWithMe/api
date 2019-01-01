@@ -13,7 +13,7 @@ module.exports = shipit => {
     },
     // Set custom Variables
     production: {
-      servers: 'ubuntu@ec2-18-219-164-132.us-east-2.compute.amazonaws.com',
+      servers: 'ubuntu@ec2-3-17-134-101.us-east-2.compute.amazonaws.com',
       build : 'tsc'
     }
   });

@@ -64,11 +64,27 @@ export class ImportHelper {
       imageUrl = spotifyAlbum.images[1].url;
     }
 
+    let releaseDate: Date;
+    switch(spotifyAlbum.release_date_precision) {
+      case 'year': {
+        releaseDate = moment.utc(spotifyAlbum.release_date, 'YYYY').toDate();
+        break;
+      }
+      case 'month': {
+        releaseDate = moment.utc(spotifyAlbum.release_date, 'YYYY-MM').toDate();
+        break;
+      }
+      case 'day': {
+        releaseDate = moment.utc(spotifyAlbum.release_date, 'YYYY-MM-DD').toDate();
+        break;
+      }
+    }
+
     const albumObject = {
       name: spotifyAlbum.name,
       spotifyUrl: spotifyAlbum.external_urls.spotify,
       imageUrl,
-      releaseDate: moment.utc(spotifyAlbum.release_date).toDate(),
+      releaseDate,
       spotifyId: spotifyAlbum.id,
     }
 
