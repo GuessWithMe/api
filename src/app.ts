@@ -7,6 +7,8 @@ import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import moment from 'moment';
+import { startWorker } from './worker';
+
 const passport = require('passport');
 
 import Environment from '@env';
@@ -14,6 +16,7 @@ import * as SongDistrubuter from '@services/SongDistributer.service';
 import Websockets from "@config/websockets";
 
 // Routes
+import AdminRoutes from '@routes/Admin';
 import AuthRoutes from '@routes/Auth';
 import GameRoutes from '@routes/Game';
 import PlaylistRoutes from '@routes/Playlist';
@@ -43,6 +46,7 @@ class App {
     this.configureWebSockets();
     this.mountRoutes();
     this.startSongDistributer();
+    startWorker();
   }
 
 
@@ -52,6 +56,7 @@ class App {
     this.express.use('/game', GameRoutes);
     this.express.use('/playlists', PlaylistRoutes);
     this.express.use('/users', UserRoutes);
+    this.express.use('/admin', AdminRoutes);
     this.express.use('/', router);
   }
 
@@ -182,6 +187,11 @@ class App {
   private async startSongDistributer() {
     SongDistrubuter.start();
   }
+
+
+  // private async startBackgroundWorker() {
+  //   SongDistrubuter.start();
+  // }
 }
 
 export default new App().express;

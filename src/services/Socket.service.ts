@@ -52,4 +52,14 @@ export default class SocketService {
 
     return activePlayers;
   }
+
+
+  /**
+   * Emits playlist import progress to the importer.
+   *
+   * @param progress
+   */
+  public sendPlaylistImportProgress(socketId: string, progress: any): void {
+    this.socket.sockets.connected[socketId].send(progress);
+  }
 }

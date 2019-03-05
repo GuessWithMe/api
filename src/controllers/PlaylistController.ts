@@ -3,6 +3,8 @@ import { Request, Response } from 'express';
 import SpotifyService from '@services/Spotify.service';
 import { ImportHelper } from '../helpers/ImportHelper';
 import { SpotifySong } from '@t/SpotifySong';
+import { worker } from './../worker';
+
 
 export async function getPlaylists(req: Request, res: Response): Promise<Response> {
   try {
@@ -21,36 +23,39 @@ export async function getPlaylists(req: Request, res: Response): Promise<Respons
 /**
  * Imports all the possible songs from a players given playlist
  */
-export async function importPlaylist(req: Request, res: Response): Promise<Response> {
-  try {
-    const songsRes = await new SpotifyService().getPlaylist(
-      res.locals.user,
-      req.body.playlist.spotifyId,
-    );
+export async function importPlaylist(req: Request, res: Response): Promise<any> {
+  worker.importPlaylist(res.locals.user, req.body.playlist.spotifyId);
+  return res.json().status(204);
 
-    for (const s of songsRes.body['tracks'].items as SpotifySong[]) {
-      // No use from local tracks since we can't play them
-      // for everyone.
-      if (s.is_local) {
-        continue;
-      }
+  // try {
+  //   const songsRes = await new SpotifyService().getPlaylist(
+  //     res.locals.user,
+  //     req.body.playlist.spotifyId,
+  //   );
 
-      const songArtists = [];
-      for (const spotifyArtist of s.track.artists) {
-        const artist = await ImportHelper.importArtist(spotifyArtist);
-        songArtists.push(artist);
-      }
+  //   for (const s of songsRes.body['tracks'].items as SpotifySong[]) {
+  //     // No use from local tracks since we can't play them
+  //     // for everyone.
+  //     if (s.is_local) {
+  //       continue;
+  //     }
 
-      const song = await ImportHelper.importSong(s.track);
-      await song.$set('artists', songArtists);
+  //     const songArtists = [];
+  //     for (const spotifyArtist of s.track.artists) {
+  //       const artist = await ImportHelper.importArtist(spotifyArtist);
+  //       songArtists.push(artist);
+  //     }
 
-      const album = await ImportHelper.importAlbum(s.track.album);
-      await song.$set('album', album);
-    }
+  //     const song = await ImportHelper.importSong(s.track);
+  //     await song.$set('artists', songArtists);
 
-    return res.json({ status: true });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json(error.message);
-  }
+  //     const album = await ImportHelper.importAlbum(s.track.album);
+  //     await song.$set('album', album);
+  //   }
+
+  //   return res.json({ status: true });
+  // } catch (error) {
+  //   console.log(error);
+  //   return res.status(500).json(error.message);
+  // }
 }
