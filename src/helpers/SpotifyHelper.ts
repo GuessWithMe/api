@@ -1,17 +1,26 @@
 import moment from 'moment';
 import SpotifyWebApi from 'spotify-web-api-node';
 
+import environment from '@env';
 import { User } from '@models';
-import Environment from '@env';
+
+interface RefreshAccessTokenResponse {
+  body: {
+    access_token: string;
+    token_type: string;
+    expires_in: number;
+    scope: string;
+  };
+}
 
 export class SpotifyHelper {
   public static async initializeSpotify(user: User): Promise<any> {
     // Checking if token needs to be refreshed
     let spotifyApi = new SpotifyWebApi({
-      clientId: Environment.spotifyClientId,
-      clientSecret: Environment.spotifyClientSecret,
       accessToken: user.spotifyAccessToken,
-      refreshToken: user.spotifyRefreshToken,
+      clientId: environment.spotifyClientId,
+      clientSecret: environment.spotifyClientSecret,
+      refreshToken: user.spotifyRefreshToken
     });
 
     if (moment(user.tokenExpiresAt).diff(moment()) < 0) {
@@ -21,13 +30,10 @@ export class SpotifyHelper {
     return spotifyApi;
   }
 
-
-  public static async refreshAccessToken(user: User, spotifyApi: SpotifyWebApi): Promise<any> {
-    const res = await spotifyApi.refreshAccessToken();
-    spotifyApi.setAccessToken(res.body['access_token']);
+  public static async refreshAccessToken(user: User, spotifyApi: any): Promise<any> {
+    const res: RefreshAccessTokenResponse = await spotifyApi.refreshAccessToken();
+    spotifyApi.setAccessToken(res.body.access_token);
 
     return spotifyApi;
   }
 }
-
-
