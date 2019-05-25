@@ -4,6 +4,7 @@ import cors from 'cors';
 import express from 'express';
 import { Express } from 'express-serve-static-core';
 import session from 'express-session';
+import http from 'http';
 import moment from 'moment';
 import morgan from 'morgan';
 import passport, { PassportStatic } from 'passport';
@@ -25,17 +26,20 @@ import UserRoutes from '@routes/User';
 import { Album, Artist, Song, SongArtist, User } from '@models';
 
 class App {
-  public express: Express;
+  public app: Express;
   public spotifyStrategy = SpotifyStrategy;
+  public server: http.Server;
 
   constructor() {
-    this.express = express();
+    this.app = express();
+    this.server = http.createServer(this.app);
+
+    this.configureWebSockets();
     this.configureSequelize();
     this.configureCors();
     this.configureExpressSession();
     this.setupPassport(passport);
     this.configureMorgan();
-    this.configureWebSockets();
     this.mountRoutes();
     this.startSongDistributer();
     startWorker();
@@ -43,12 +47,12 @@ class App {
 
   private mountRoutes(): void {
     const router = express.Router();
-    this.express.use('/auth', AuthRoutes);
-    this.express.use('/game', GameRoutes);
-    this.express.use('/playlists', PlaylistRoutes);
-    this.express.use('/users', UserRoutes);
-    this.express.use('/admin', AdminRoutes);
-    this.express.use('/', router);
+    this.app.use('/auth', AuthRoutes);
+    this.app.use('/game', GameRoutes);
+    this.app.use('/playlists', PlaylistRoutes);
+    this.app.use('/users', UserRoutes);
+    this.app.use('/admin', AdminRoutes);
+    this.app.use('/', router);
   }
 
   private configureCors(): void {
@@ -57,7 +61,7 @@ class App {
       origin: [Environment.angularUrl, 'https://accounts.spotify.com']
     };
 
-    this.express.use(cors(corsOptions));
+    this.app.use(cors(corsOptions));
   }
 
   private configureSequelize(): void {
@@ -75,13 +79,13 @@ class App {
   }
 
   private configureExpressSession() {
-    this.express.use(bodyParser.json());
-    this.express.use(bodyParser.urlencoded({ extended: false }));
-    this.express.use(cookieParser());
+    this.app.use(bodyParser.json());
+    this.app.use(bodyParser.urlencoded({ extended: false }));
+    this.app.use(cookieParser());
 
     const RedisStore = require('connect-redis')(session);
 
-    this.express.use(
+    this.app.use(
       session({
         cookie: { secure: false },
         resave: false,
@@ -137,18 +141,16 @@ class App {
       )
     );
 
-    this.express.use(passport.initialize());
-    this.express.use(passport.session());
+    this.app.use(passport.initialize());
+    this.app.use(passport.session());
   }
 
   private configureMorgan() {
-    this.express.use(morgan('tiny'));
+    this.app.use(morgan('tiny'));
   }
 
   private configureWebSockets() {
-    const server = require('http').createServer(this.express);
-    Websockets.initialize(server);
-    server.listen(3001);
+    Websockets.initialize(this.server);
   }
 
   private async startSongDistributer() {
@@ -160,4 +162,4 @@ class App {
   // }
 }
 
-export default new App().express;
+export default new App();
