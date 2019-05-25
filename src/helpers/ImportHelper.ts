@@ -1,11 +1,11 @@
 import moment from 'moment';
 
-import { Artist, Song, Album } from "@models";
-import { Album as SpotifyAlbum } from "@t/SpotifySong";
+import { Album, Artist, Song } from '@models';
+import { Album as SpotifyAlbum } from '@t/SpotifySong';
 
 export class ImportHelper {
   public static async importSong(track: any): Promise<Song> {
-    let song = await Song.findOne({ where: { spotifyId: track.id  }})
+    let song = await Song.findOne({ where: { spotifyId: track.id } });
 
     const songObject = {
       name: track.name,
@@ -13,38 +13,28 @@ export class ImportHelper {
       previewUrl: track.preview_url,
       spotifyId: track.id,
       spotifyUrl: track.external_urls.spotify
-    }
+    };
 
-    if (song) {
-      song = await song.update(songObject);
-    } else {
-      song = await Song.create(songObject);
-    }
-
+    song = song ? await song.update(songObject) : await Song.create(songObject);
     return song;
   }
 
-
   public static async importArtist(spotifyArtist: any): Promise<Artist> {
-    let artist = await Artist.findOne({ where: {
-      spotifyId: spotifyArtist.id
-    }});
+    let artist = await Artist.findOne({
+      where: {
+        spotifyId: spotifyArtist.id
+      }
+    });
 
     const artistObject = {
       name: spotifyArtist.name,
-      spotifyUrl: spotifyArtist.external_urls.spotify,
       spotifyId: spotifyArtist.id,
-    }
+      spotifyUrl: spotifyArtist.external_urls.spotify
+    };
 
-    if (artist) {
-      artist = await artist.update(artistObject);
-    } else {
-      artist = await Artist.create(artistObject);
-    }
-
+    artist = artist ? await artist.update(artistObject) : await Artist.create(artistObject);
     return artist;
   }
-
 
   /**
    * Imports an album and it's properties.
@@ -55,9 +45,11 @@ export class ImportHelper {
    * @memberof ImportHelper
    */
   public static async importAlbum(spotifyAlbum: SpotifyAlbum): Promise<Album> {
-    let album = await Album.findOne({ where: {
-      spotifyId: spotifyAlbum.id
-    }});
+    let album = await Album.findOne({
+      where: {
+        spotifyId: spotifyAlbum.id
+      }
+    });
 
     let imageUrl: string = null;
     if (spotifyAlbum.images && spotifyAlbum.images.length > 0) {
@@ -65,7 +57,7 @@ export class ImportHelper {
     }
 
     let releaseDate: Date;
-    switch(spotifyAlbum.release_date_precision) {
+    switch (spotifyAlbum.release_date_precision) {
       case 'year': {
         releaseDate = moment.utc(spotifyAlbum.release_date, 'YYYY').toDate();
         break;
@@ -85,8 +77,8 @@ export class ImportHelper {
       spotifyUrl: spotifyAlbum.external_urls.spotify,
       imageUrl,
       releaseDate,
-      spotifyId: spotifyAlbum.id,
-    }
+      spotifyId: spotifyAlbum.id
+    };
 
     if (album) {
       album = await album.update(albumObject);
@@ -97,5 +89,3 @@ export class ImportHelper {
     return album;
   }
 }
-
-

@@ -1,9 +1,8 @@
 import sio from 'socket.io';
 
-import { ActivePlayerHelper } from "@helpers/ActivePlayerHelper";
-import { Song } from "@models";
-import Websockets from "@config/websockets";
-
+import { ActivePlayerHelper } from '@helpers/ActivePlayerHelper';
+import { Song } from '@models';
+import Websockets from '@config/websockets';
 
 export default class SocketService {
   private socket;
@@ -16,7 +15,6 @@ export default class SocketService {
     this.socket.emit('song', song);
   }
 
-
   /**
    * Sends a pause event with the last song played for displaying the correct
    * answer
@@ -26,7 +24,6 @@ export default class SocketService {
   public sendPause(song: Song) {
     this.socket.emit('pause', song);
   }
-
 
   /**
    * Broadcasts active player list to all clients using websockets.
@@ -38,18 +35,25 @@ export default class SocketService {
     this.socket.emit('activePlayers', activePlayers);
   }
 
-
   public filterActivePlayers(activePlayers: object): any {
-    const socketIds = Object.keys(activePlayers).map((key) => key);
+    const socketIds = Object.keys(activePlayers).map(key => key);
 
     for (const id of socketIds) {
       if (this.socket.sockets.clients().connected[id]) {
-
       } else {
         delete activePlayers[id];
       }
     }
 
     return activePlayers;
+  }
+
+  /**
+   * Emits playlist import progress to the importer.
+   *
+   * @param progress
+   */
+  public sendPlaylistImportProgress(socketId: string, progress: any): void {
+    this.socket.sockets.connected[socketId].send(progress);
   }
 }

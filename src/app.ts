@@ -1,36 +1,31 @@
-import { Sequelize } from 'sequelize-typescript';
-import { Strategy as SpotifyStrategy } from 'passport-spotify';
-import cors from 'cors';
-import express from 'express'
-import session from 'express-session';
-import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import express from 'express';
+import { Express } from 'express-serve-static-core';
+import session from 'express-session';
 import moment from 'moment';
-const passport = require('passport');
+import morgan from 'morgan';
+import passport, { PassportStatic } from 'passport';
+import { Strategy as SpotifyStrategy } from 'passport-spotify';
+import { Sequelize } from 'sequelize-typescript';
 
+import Websockets from '@config/websockets';
 import Environment from '@env';
 import * as SongDistrubuter from '@services/SongDistributer.service';
-import Websockets from "@config/websockets";
+import { startWorker } from './worker';
 
 // Routes
+import AdminRoutes from '@routes/Admin';
 import AuthRoutes from '@routes/Auth';
 import GameRoutes from '@routes/Game';
 import PlaylistRoutes from '@routes/Playlist';
 import UserRoutes from '@routes/User';
 
-import {
-  Album,
-  Artist,
-  Song,
-  SongArtist,
-  User,
-} from '@models';
-
+import { Album, Artist, Song, SongArtist, User } from '@models';
 
 class App {
-  public express: any;
-  public corsOptions: object;
+  public express: Express;
   public spotifyStrategy = SpotifyStrategy;
 
   constructor() {
@@ -43,120 +38,100 @@ class App {
     this.configureWebSockets();
     this.mountRoutes();
     this.startSongDistributer();
+    startWorker();
   }
 
-
   private mountRoutes(): void {
-    const router = express.Router()
+    const router = express.Router();
     this.express.use('/auth', AuthRoutes);
     this.express.use('/game', GameRoutes);
     this.express.use('/playlists', PlaylistRoutes);
     this.express.use('/users', UserRoutes);
+    this.express.use('/admin', AdminRoutes);
     this.express.use('/', router);
   }
 
-
   private configureCors(): void {
     const corsOptions = {
-      // allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "X-Access-Token"],
       credentials: true,
-      // methods: "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
-      origin: [
-        Environment.angularUrl,
-        'https://accounts.spotify.com',
-      ],
-      // preflightContinue: false,
-    }
+      origin: [Environment.angularUrl, 'https://accounts.spotify.com']
+    };
 
     this.express.use(cors(corsOptions));
-    // this.express.options("*", cors(corsOptions))
   }
-
 
   private configureSequelize(): void {
-    const sequelize =  new Sequelize({
-      host: Environment.maria.host,
+    const sequelize = new Sequelize({
       database: Environment.maria.db,
       dialect: 'mysql',
-      username: Environment.maria.user,
+      host: Environment.maria.host,
       password: Environment.maria.pass,
-      storage: ':memory:',
       port: Environment.maria.port,
+      storage: ':memory:',
+      username: Environment.maria.user
     });
 
-    sequelize.addModels([
-      Album,
-      Artist,
-      Song,
-      SongArtist,
-      User,
-    ]);
+    sequelize.addModels([Album, Artist, Song, SongArtist, User]);
   }
-
 
   private configureExpressSession() {
     this.express.use(bodyParser.json());
     this.express.use(bodyParser.urlencoded({ extended: false }));
     this.express.use(cookieParser());
 
+    const RedisStore = require('connect-redis')(session);
 
-    var RedisStore = require('connect-redis')(session);
-
-    this.express.use(session({
-      store: new RedisStore({
-        host: Environment.redis.host,
-        port: Environment.redis.port,
-      }),
-      secret: 'keyboard cat',
-      resave: false,
-      saveUninitialized: true,
-      cookie: { secure: false }
-    }))
+    this.express.use(
+      session({
+        cookie: { secure: false },
+        resave: false,
+        saveUninitialized: true,
+        secret: 'keyboard cat',
+        store: new RedisStore({
+          host: Environment.redis.host,
+          port: Environment.redis.port
+        })
+      })
+    );
   }
 
-
-  private setupPassport(passport: any): void {
+  // tslint:disable-next-line: no-shadowed-variable
+  private setupPassport(passport: PassportStatic): void {
     passport.serializeUser((user, done) => {
       done(undefined, user);
     });
 
     passport.deserializeUser((user, done) => {
-      done(null, user);
+      done(undefined, user);
     });
 
     passport.use(
       new SpotifyStrategy(
         {
+          callbackURL: `${Environment.apiUrl}/auth/spotify/callback`,
           clientID: Environment.spotifyClientId,
-          clientSecret: Environment.spotifyClientSecret,
-          callbackURL: `${Environment.apiUrl}/auth/spotify/callback`
+          clientSecret: Environment.spotifyClientSecret
         },
-        async (accessToken, refreshToken, expires_in, profile, done) => {
-          let imageUrl;
-          if (profile.photos.length > 0) {
-            imageUrl = profile.photos[0];
-          }
-
+        async (accessToken: string, refreshToken: string, expiresIn: any, profile: any, done: any) => {
           const userData = {
             spotifyAccessToken: accessToken,
             spotifyDisplayName: profile.displayName,
             spotifyId: profile.id,
-            spotifyImageUrl: imageUrl,
+            spotifyImageUrl: profile.photos[0] || undefined,
             spotifyRefreshToken: refreshToken,
             spotifyUsername: profile.username,
-            tokenExpiresAt: moment().add(expires_in, 'seconds').toDate(),
-          }
+            tokenExpiresAt: moment()
+              .add(expiresIn, 'seconds')
+              .toDate()
+          };
 
-          let user = await User.find({ where: {
-            spotifyId: profile.id,
-          }});
+          let user = await User.find({
+            where: {
+              spotifyId: profile.id
+            }
+          });
 
-          if (user) {
-            user = await user.update(userData);
-          } else {
-            user = await User.create(userData);
-          }
-
+          user = user ? await user.update(userData) : await User.create(userData);
           return done(undefined, user);
         }
       )
@@ -166,22 +141,23 @@ class App {
     this.express.use(passport.session());
   }
 
-
   private configureMorgan() {
     this.express.use(morgan('tiny'));
   }
 
-
   private configureWebSockets() {
-    var server = require('http').createServer(this.express);
+    const server = require('http').createServer(this.express);
     Websockets.initialize(server);
     server.listen(3001);
   }
 
-
   private async startSongDistributer() {
     SongDistrubuter.start();
   }
+
+  // private async startBackgroundWorker() {
+  //   SongDistrubuter.start();
+  // }
 }
 
 export default new App().express;
