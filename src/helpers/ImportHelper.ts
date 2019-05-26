@@ -2,6 +2,7 @@ import moment from 'moment';
 
 import { Album, Artist, Song } from '@models';
 import { Album as SpotifyAlbum } from '@t/SpotifySong';
+import { Job } from 'kue';
 
 export class ImportHelper {
   public static async importSong(track: any): Promise<Song> {
@@ -51,7 +52,7 @@ export class ImportHelper {
       }
     });
 
-    let imageUrl: string = null;
+    let imageUrl: string;
     if (spotifyAlbum.images && spotifyAlbum.images.length > 0) {
       imageUrl = spotifyAlbum.images[1].url;
     }
@@ -73,19 +74,14 @@ export class ImportHelper {
     }
 
     const albumObject = {
-      name: spotifyAlbum.name,
-      spotifyUrl: spotifyAlbum.external_urls.spotify,
       imageUrl,
+      name: spotifyAlbum.name,
       releaseDate,
-      spotifyId: spotifyAlbum.id
+      spotifyId: spotifyAlbum.id,
+      spotifyUrl: spotifyAlbum.external_urls.spotify
     };
 
-    if (album) {
-      album = await album.update(albumObject);
-    } else {
-      album = await Album.create(albumObject);
-    }
-
+    album = album ? await album.update(albumObject) : await Album.create(albumObject);
     return album;
   }
 }

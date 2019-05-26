@@ -26,10 +26,12 @@ class BackgroundWorker {
         let songsProcessed = 0;
 
         const playlist = await new SpotifyService().getPlaylist(job.data.user, job.data.playlistId);
+        const eligibleTracks = playlist.tracks.items.filter(s => !s.is_local);
 
-        for (const s of playlist.tracks.items as SpotifySong[]) {
+        for (const s of eligibleTracks as SpotifySong[]) {
           const songArtists = [];
           for (const spotifyArtist of s.track.artists) {
+            job.log(JSON.stringify(spotifyArtist));
             const artist = await ImportHelper.importArtist(spotifyArtist);
             songArtists.push(artist);
           }
@@ -43,7 +45,7 @@ class BackgroundWorker {
           songsProcessed += 1;
           // Sending a message about a song import
           const activePlayers = await ActivePlayerHelper.getActivePlayers();
-          const progress = songsProcessed / playlist.tracks.items.length;
+          const progress = songsProcessed / eligibleTracks.length;
           let socketId: string;
           for (const key in activePlayers) {
             if (activePlayers[key].id === job.data.user.id) {
@@ -53,7 +55,10 @@ class BackgroundWorker {
           }
 
           new SocketService().sendPlaylistImportProgress(socketId, {
-            playlistId: playlist.id,
+            playlist: {
+              id: playlist.id,
+              name: playlist.name
+            },
             progress
           });
         }
@@ -73,7 +78,7 @@ class BackgroundWorker {
         console.log('Job completed with data ', result);
       })
       .on('failed attempt', (errorMessage, doneAttempts) => {
-        console.log('Job failed');
+        console.log('Job failed', errorMessage);
       })
       .on('failed', errorMessage => {
         console.log('Job failed');

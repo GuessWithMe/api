@@ -1,6 +1,7 @@
-import SocketService from "@services/Socket.service";
-import { Sequelize } from "sequelize-typescript";
-import { Song, Artist, Album } from "@models";
+import SocketService from '@services/Socket.service';
+import { Sequelize } from 'sequelize-typescript';
+
+import { Album, Artist, Song } from '@models';
 import moment from 'moment';
 
 const PAUSE_LENGTH = 5000;
@@ -13,53 +14,55 @@ let timer: NodeJS.Timer;
 let leftCountdown: NodeJS.Timer;
 let startingTime = moment();
 
-
 export async function start(): Promise<void> {
   clearInterval(timer);
   startingTime = moment();
   await this.sendNextSong();
 
-  timer = setInterval((self) => {
-    self.processSongEnding()
-    clearInterval(leftCountdown);
-    leftCountdown = setInterval(function() {
-      let secondsLeft = moment().diff(startingTime, 'seconds');
-    }, 1000);
+  timer = setInterval(
+    self => {
+      self.processSongEnding();
+      clearInterval(leftCountdown);
+      leftCountdown = setInterval(() => {
+        const secondsLeft = moment().diff(startingTime, 'seconds');
+      }, 1000);
 
-    setTimeout(async (self) => {
-      // Pause ends and a new song gets distributed.
-      await self.sendNextSong();
-      startingTime = moment();
-    }, PAUSE_LENGTH, self);
-  }, GUESS_TIME + PAUSE_LENGTH, this);
+      setTimeout(
+        async self => {
+          // Pause ends and a new song gets distributed.
+          await self.sendNextSong();
+          startingTime = moment();
+        },
+        PAUSE_LENGTH,
+        self
+      );
+    },
+    GUESS_TIME + PAUSE_LENGTH,
+    this
+  );
 }
-
 
 export function getStatus(): object {
   return {
     currentSong,
-    previousSong,
-    timeLeft: GUESS_TIME/1000 - moment().diff(startingTime, 'seconds'),
     isPaused,
-  }
+    previousSong,
+    timeLeft: GUESS_TIME / 1000 - moment().diff(startingTime, 'seconds')
+  };
 }
 
-
-export async function getRandomSong(): Promise<Song> {
+export const getRandomSong = async (): Promise<Song> => {
   const song = await Song.find({
-    order: [ Sequelize.fn('RAND') ],
-    include: [ Artist, Album ],
+    include: [Artist, Album],
+    order: [Sequelize.fn('RAND')],
     where: {
+      // tslint:disable-next-line: no-null-keyword
       previewUrl: { $ne: null }
     }
   });
 
-  // const song = await Song.findById(267, {
-  //   include: [ Artist ]
-  // });
   return song;
-}
-
+};
 
 export async function sendNextSong(): Promise<void> {
   const song = await this.getRandomSong();
@@ -68,14 +71,12 @@ export async function sendNextSong(): Promise<void> {
   new SocketService().sendNextSong(song);
 }
 
-
-export async function processSongEnding(): Promise<void> {
+export const processSongEnding = (): void => {
   previousSong = currentSong;
-  currentSong = null;
+  currentSong = undefined;
   isPaused = true;
   new SocketService().sendPause(previousSong);
-}
-
+};
 
 /**
  * Sends a pause event and restarts with a new guess after certain number of
@@ -83,10 +84,10 @@ export async function processSongEnding(): Promise<void> {
  *
  * @returns Promise<void>
  */
-export async function restartAfterPause(): Promise<void> {
+export const restartAfterPause = (): void => {
   new SocketService().sendPause(currentSong);
   // Start a new after a pause.
   setTimeout(async () => {
     await this.start();
-  }, PAUSE_LENGTH)
-}
+  }, PAUSE_LENGTH);
+};
