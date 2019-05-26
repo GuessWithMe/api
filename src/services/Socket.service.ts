@@ -1,8 +1,8 @@
 import sio from 'socket.io';
 
+import Websockets from '@config/websockets';
 import { ActivePlayerHelper } from '@helpers/ActivePlayerHelper';
 import { Song } from '@models';
-import Websockets from '@config/websockets';
 
 export default class SocketService {
   private socket;
@@ -39,8 +39,7 @@ export default class SocketService {
     const socketIds = Object.keys(activePlayers).map(key => key);
 
     for (const id of socketIds) {
-      if (this.socket.sockets.clients().connected[id]) {
-      } else {
+      if (!this.socket.sockets.clients().connected[id]) {
         delete activePlayers[id];
       }
     }
@@ -54,6 +53,6 @@ export default class SocketService {
    * @param progress
    */
   public sendPlaylistImportProgress(socketId: string, progress: any): void {
-    this.socket.sockets.connected[socketId].send(progress);
+    this.socket.sockets.connected[socketId].emit('playlistProgress', progress);
   }
 }

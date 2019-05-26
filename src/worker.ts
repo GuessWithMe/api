@@ -25,49 +25,42 @@ class BackgroundWorker {
       try {
         let songsProcessed = 0;
 
-        const songsRes = await new SpotifyService().getPlaylist(job.data.user, job.data.playlistId);
+        const playlist = await new SpotifyService().getPlaylist(job.data.user, job.data.playlistId);
 
-        job.log('asdf');
-        // for (const s of songsRes.body['tracks'].items as SpotifySong[]) {
-        //   // No use from local tracks since we can't play them
-        //   // for everyone.
-        //   if (s.is_local) {
-        //     continue;
-        //   }
+        for (const s of playlist.tracks.items as SpotifySong[]) {
+          const songArtists = [];
+          for (const spotifyArtist of s.track.artists) {
+            const artist = await ImportHelper.importArtist(spotifyArtist);
+            songArtists.push(artist);
+          }
 
-        //   const songArtists = [];
-        //   for (const spotifyArtist of s.track.artists) {
-        //     const artist = await ImportHelper.importArtist(spotifyArtist);
-        //     songArtists.push(artist);
-        //   }
+          const song = await ImportHelper.importSong(s.track);
+          await song.$set('artists', songArtists);
 
-        //   const song = await ImportHelper.importSong(s.track);
-        //   await song.$set('artists', songArtists);
+          const album = await ImportHelper.importAlbum(s.track.album);
+          await song.$set('album', album);
 
-        //   const album = await ImportHelper.importAlbum(s.track.album);
-        //   await song.$set('album', album);
+          songsProcessed += 1;
+          // Sending a message about a song import
+          const activePlayers = await ActivePlayerHelper.getActivePlayers();
+          const progress = songsProcessed / playlist.tracks.items.length;
+          let socketId: string;
+          for (const key in activePlayers) {
+            if (activePlayers[key].id === job.data.user.id) {
+              socketId = key;
+              break;
+            }
+          }
 
-        //   songsProcessed += 1;
-        //   // Sending a message about a song import
-        //   const activePlayers = await ActivePlayerHelper.getActivePlayers();
-        //   const progress = songsProcessed / songsRes.body.tracks.items.length;
-        //   let socketId: string;
-        //   for (const key in activePlayers) {
-        //     if (activePlayers[key].id === job.data.user.id) {
-        //       socketId = key;
-        //       break;
-        //     }
-        //   }
+          new SocketService().sendPlaylistImportProgress(socketId, {
+            playlistId: playlist.id,
+            progress
+          });
+        }
 
-        //   new SocketService().sendPlaylistImportProgress(socketId, {
-        //     playlist: songsRes.body,
-        //     progress
-        //   });
-        // }
-
-        done(songsRes);
-      } catch (error) {
         done();
+      } catch (error) {
+        done(error);
       }
     });
   }

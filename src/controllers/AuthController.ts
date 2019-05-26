@@ -1,27 +1,19 @@
-import { Request, Response } from 'express';
 import Environment from '@env';
+import { Handler } from 'express';
 
-
-export async function loginWithSpotify(req: Request, res: Response): Promise<void> {
+export const loginWithSpotify: Handler = (req, res): void => {
   return res.redirect(`${Environment.angularUrl}/game`);
-}
+};
 
-
-export async function checkIfAuthed(req: Request, res: Response): Promise<Response> {
+export const checkIfAuthed: Handler = (req, res) => {
   return res.json({ authed: true });
-}
-
+};
 
 /**
  * Log out and remove user from the player list
- *
- * @param {Request} req
- * @param {Response} res
- * @returns {(Promise<Response | void>)}
  */
-export async function logOut(req: Request, res: Response): Promise<Response | void> {
+export const logOut: Handler = (req, res): void => {
   req.session.destroy(() => {
     return res.status(204).json();
   });
-}
-
+};

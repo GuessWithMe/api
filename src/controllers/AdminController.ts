@@ -1,9 +1,7 @@
-import { Request, Response } from 'express';
-import Environment from '@env';
-import { Song, SongArtist, Artist, Album } from '@models';
+import { Album, Artist, Song, SongArtist } from '@models';
+import { Handler, Response } from 'express';
 
-
-export async function truncateDatabase(req: Request, res: Response): Promise<Response> {
+export const truncateDatabase: Handler = async (req, res): Promise<Response> => {
   try {
     await SongArtist.destroy({ where: {} });
     await Song.destroy({ where: {} });
@@ -14,5 +12,4 @@ export async function truncateDatabase(req: Request, res: Response): Promise<Res
   } catch (err) {
     console.log(err);
   }
-}
-
+};

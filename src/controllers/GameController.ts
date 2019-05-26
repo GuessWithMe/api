@@ -1,15 +1,14 @@
-import { Request, Response } from 'express';
+import { Handler, Response } from 'express';
 
 import { ActivePlayerHelper } from '@helpers/ActivePlayerHelper';
-import * as SongDistributer from '@services/SongDistributer.service';
 import GameService from '@services/Game.service';
-import SocketService from "@services/Socket.service";
-
+import SocketService from '@services/Socket.service';
+import * as SongDistributer from '@services/SongDistributer.service';
 
 /**
  * Retrives the active song, time left and active player list.
  */
-export async function getStatus(req: Request, res: Response): Promise<Response> {
+export const getStatus: Handler = async (req, res): Promise<Response> => {
   try {
     const status = SongDistributer.getStatus();
     let activePlayers = await ActivePlayerHelper.getActivePlayers();
@@ -19,10 +18,9 @@ export async function getStatus(req: Request, res: Response): Promise<Response> 
   } catch (error) {
     return res.status(500).json(error.message);
   }
-}
+};
 
-
-export async function addActiveUser(req: Request, res: Response): Promise<Response> {
+export const addActiveUser: Handler = async (req, res): Promise<Response> => {
   try {
     let activePlayers = await ActivePlayerHelper.getActivePlayers();
 
@@ -38,24 +36,22 @@ export async function addActiveUser(req: Request, res: Response): Promise<Respon
   } catch (error) {
     return res.status(500).json(error.message);
   }
-}
-
+};
 
 /**
  * Removes user from the active player list
  */
-export async function removeActiveUser(req: Request, res: Response): Promise<Response> {
+export const removeActiveUser: Handler = async (req, res): Promise<Response> => {
   try {
     await GameService.removeActiveUser(req.body.socketId);
     return res.status(204);
   } catch (error) {
     return res.status(500).json(error.message);
   }
-}
+};
 
-
-export async function health(req: Request, res: Response): Promise<Response> {
+export const health: Handler = (req, res): Response => {
   return res.status(200).json({
     health: true
   });
-}
+};
