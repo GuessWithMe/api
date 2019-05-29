@@ -3,6 +3,7 @@ import { Sequelize } from 'sequelize-typescript';
 
 import { Album, Artist, Song } from '@models';
 import moment from 'moment';
+import { Op } from 'sequelize';
 
 const PAUSE_LENGTH = 5000;
 const GUESS_TIME = 30000;
@@ -52,12 +53,12 @@ export function getStatus(): object {
 }
 
 export const getRandomSong = async (): Promise<Song> => {
-  const song = await Song.find({
+  const song = await Song.findOne({
     include: [Artist, Album],
     order: [Sequelize.fn('RAND')],
     where: {
       // tslint:disable-next-line: no-null-keyword
-      previewUrl: { $ne: null }
+      previewUrl: { [Op.ne]: null }
     }
   });
 

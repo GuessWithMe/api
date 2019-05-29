@@ -129,7 +129,7 @@ class App {
               .toDate()
           };
 
-          let user = await User.find({
+          let user = await User.findOne({
             where: {
               spotifyId: profile.id
             }
@@ -156,10 +156,6 @@ class App {
   private async startSongDistributer() {
     SongDistrubuter.start();
   }
-
-  // private async startBackgroundWorker() {
-  //   SongDistrubuter.start();
-  // }
 }
 
 export default new App();

@@ -1,5 +1,11 @@
 import {
-  Table, Model, Column, BelongsToMany, PrimaryKey, AutoIncrement, HasMany,
+  Table,
+  Model,
+  Column,
+  BelongsToMany,
+  PrimaryKey,
+  AutoIncrement,
+  HasMany,
   BelongsTo
 } from 'sequelize-typescript';
 import { Artist, SongArtist, Album } from '@models';

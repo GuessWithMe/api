@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha",
     "lint": "eslint src --ext ts",
-    "migrate": "npx sequelize-cli db:migrate"
+    "migrate": "npx sequelize-cli db:migrate",
+    "rollback": "npx sequelize db:migrate:undo"
   },
   "author": "",
   "license": "ISC",
@@ -25,9 +26,9 @@
     "passport": "^0.4.0",
     "passport-spotify": "^1.0.1",
     "reflect-metadata": "^0.1.12",
-    "sequelize": "^4.38.0",
-    "sequelize-cli": "^4.0.0",
-    "sequelize-typescript": "^0.6.5",
+    "sequelize": "5.0.0-beta.17",
+    "sequelize-cli": "^5.4.0",
+    "sequelize-typescript": "^1.0.0-beta.3",
     "socket.io": "^2.1.1",
     "spotify-web-api-node": "4.0.0",
     "ts-node": "^7.0.0",
@@ -42,6 +43,7 @@
     "@types/morgan": "^1.7.35",
     "@types/node": "^10.5.1",
     "@types/passport": "^1.0.0",
+    "@types/sequelize": "^4.28.2",
     "@types/socket.io": "^1.4.37",
     "morgan": "^1.9.0",
     "prettier": "^1.17.1",
