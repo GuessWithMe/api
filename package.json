@@ -7,6 +7,7 @@
     "test": "mocha",
     "lint": "eslint src --ext ts",
     "migrate": "npx sequelize-cli db:migrate",
+    "generate:migration": "npx sequelize migration:generate",
     "rollback": "npx sequelize db:migrate:undo"
   },
   "author": "",

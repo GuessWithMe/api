@@ -1,8 +1,8 @@
 import moment from 'moment';
 
-import { Album, Artist, Song } from '@models';
+import { Album, Artist, Song, Playlist, User } from '@models';
+import { SpotifyPlaylist } from '@t/SpotifyPlaylist';
 import { Album as SpotifyAlbum } from '@t/SpotifySong';
-import { Job } from 'kue';
 
 export class ImportHelper {
   public static async importSong(track: any): Promise<Song> {
@@ -35,6 +35,30 @@ export class ImportHelper {
 
     artist = artist ? await artist.update(artistObject) : await Artist.create(artistObject);
     return artist;
+  }
+
+  public static async createOrUpdatePlaylist(
+    user: User,
+    spotifyPlaylist: SpotifyPlaylist,
+    eligibleTracks: number
+  ): Promise<Playlist> {
+    let playlist = await Playlist.findOne({
+      where: {
+        spotifyId: spotifyPlaylist.id,
+        userId: user.id
+      }
+    });
+
+    const playlistObject = {
+      eligibleSongsAtLastImport: eligibleTracks,
+      lastImportAt: new Date(),
+      spotifyId: spotifyPlaylist.id,
+      totalSongsAtLastImport: spotifyPlaylist.tracks.items.length,
+      userId: user.id
+    };
+
+    playlist = playlist ? await playlist.update(playlistObject) : await Playlist.create(playlistObject);
+    return playlist;
   }
 
   /**

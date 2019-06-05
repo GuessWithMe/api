@@ -1,14 +1,6 @@
-import {
-  Table,
-  Model,
-  Column,
-  BelongsToMany,
-  PrimaryKey,
-  AutoIncrement,
-  HasMany,
-  BelongsTo
-} from 'sequelize-typescript';
-import { Artist, SongArtist, Album } from '@models';
+import { AutoIncrement, BelongsTo, BelongsToMany, Column, Model, PrimaryKey, Table } from 'sequelize-typescript';
+
+import { Album, Artist, Playlist, SongArtist, SongPlaylist } from '@models';
 
 @Table({ tableName: 'songs' })
 export class Song extends Model<Song> {
@@ -22,6 +14,9 @@ export class Song extends Model<Song> {
 
   @BelongsTo(() => Album, 'albumId')
   public album: Album;
+
+  @BelongsToMany(() => Playlist, () => SongPlaylist)
+  public playlists: Playlist[];
 
   @Column
   public name: string;

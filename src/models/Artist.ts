@@ -1,6 +1,5 @@
-import {
-  Table, Model, Column, BelongsTo, HasMany, BelongsToMany, PrimaryKey, AutoIncrement
-} from 'sequelize-typescript';
+import { AutoIncrement, BelongsToMany, Column, Model, PrimaryKey, Table } from 'sequelize-typescript';
+
 import { Song, SongArtist } from '@models';
 
 @Table({ tableName: 'artists' })

@@ -28,6 +28,8 @@ class BackgroundWorker {
         const playlist = await new SpotifyService().getPlaylist(job.data.user, job.data.playlistId);
         const eligibleTracks = playlist.tracks.items.filter(s => !s.is_local);
 
+        const dbPlaylist = await ImportHelper.createOrUpdatePlaylist(job.data.user, playlist, eligibleTracks.length);
+
         for (const s of eligibleTracks as SpotifySong[]) {
           const songArtists = [];
           for (const spotifyArtist of s.track.artists) {
@@ -41,6 +43,8 @@ class BackgroundWorker {
 
           const album = await ImportHelper.importAlbum(s.track.album);
           await song.$set('album', album);
+
+          await song.$add('playlist', dbPlaylist);
 
           songsProcessed += 1;
           // Sending a message about a song import

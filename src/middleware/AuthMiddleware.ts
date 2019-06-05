@@ -1,11 +1,11 @@
-import { NextFunction, Response, Request } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
-export const isAuthenticated = async (
-  req: Request, res: Response, next: NextFunction
-): Promise<Response|void> => {
+import { User } from '@models';
+
+export const isAuthenticated = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
     if (req.session.passport.user) {
-      res.locals.user = req.session.passport.user;
+      res.locals.user = await User.findByPk(req.session.passport.user.id);
       next();
     } else {
       throw new Error();
@@ -15,10 +15,7 @@ export const isAuthenticated = async (
   }
 };
 
-
-export const isAdmin = async (
-  req: Request, res: Response, next: NextFunction
-): Promise<Response|void> => {
+export const isAdmin = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
     if (req.session.passport.user.spotifyUsername === 'mistak3nlv') {
       next();

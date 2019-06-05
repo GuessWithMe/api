@@ -1,10 +1,9 @@
-import {
-  Table, Model, Column
-} from 'sequelize-typescript';
+import { Column, HasMany, Model, Table } from 'sequelize-typescript';
+
+import { Playlist } from '@models';
 
 @Table({ tableName: 'users' })
 export class User extends Model<User> {
-
   @Column
   public spotifyUsername: string;
 
@@ -25,4 +24,7 @@ export class User extends Model<User> {
 
   @Column
   public tokenExpiresAt: Date;
+
+  @HasMany(() => Playlist, 'userId')
+  public playlists: Playlist[];
 }

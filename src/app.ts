@@ -23,7 +23,7 @@ import GameRoutes from '@routes/Game';
 import PlaylistRoutes from '@routes/Playlist';
 import UserRoutes from '@routes/User';
 
-import { Album, Artist, Song, SongArtist, User } from '@models';
+import { Album, Artist, Song, SongArtist, User, SongPlaylist, Playlist } from '@models';
 
 class App {
   public app: Express;
@@ -75,7 +75,7 @@ class App {
       username: Environment.maria.user
     });
 
-    sequelize.addModels([Album, Artist, Song, SongArtist, User]);
+    sequelize.addModels([Album, Artist, Playlist, Song, SongArtist, SongPlaylist, User]);
   }
 
   private configureExpressSession() {
